@@ -6,6 +6,8 @@ const ejs = require("ejs");
 
 const app = express();
 
+console.log(process.env.API_KEY);
+
 app.use(express.static("public"));
 app.set("view engine", "ejs");
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -14,10 +16,17 @@ app.use(bodyParser.urlencoded({ extended: true }));
 mongoose.connect("mongodb://localhost:27017/userDB");
 
 // creating Scheama
-const userSchema = {
+const userSchema = new mongoose.Schema({
   email: String,
   password: String,
-};
+});
+
+const secret = process.env.SECRET;
+userSchema.plugin(encrypt, {
+  secret: secret,
+  encryptedFields: ["password"],
+});
+
 const User = new mongoose.model("user", userSchema);
 
 app.post("/register", function (req, res) {
